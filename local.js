@@ -38,11 +38,12 @@ const audio = document.getElementById('audio')
 const playPauseButton = document.getElementById('playPauseButton')
 const seekBar = document.getElementById('seekBar')
 const volumeBar = document.getElementById('volumeBar')
-const timeDisplay = document.getElementById('timeDisplay')
 const playList = document.getElementById('playList')
 
 let songs = []
 let currentSongIndex = -1
+let playButtons = []
+let songItems = []
 
 let db
 const request = indexedDB.open('MusicDB', 1)
@@ -97,6 +98,8 @@ function saveSong(file)
 function loadPlaylist() 
 {
     songs = []
+    playButtons = []
+    songItems = []
     playList.innerHTML = ''
 
     const transaction = db.transaction(['songs'], 'readonly')
@@ -111,23 +114,25 @@ function loadPlaylist()
         const index = songs.length - 1
 
         const li = document.createElement('li')
+        songItems.push(li)
         const wrap = document.createElement('div')
         wrap.className = 'wrap-wrapper'
 
         li.textContent = song.name
-
-        const playButton = document.createElement('button')
-        playButton.textContent = '▶︎'
-        playButton.className = 'playbutton-li'
-        playButton.onclick = () => playSong(index)
 
         const deleteButton = document.createElement('button')
         deleteButton.textContent = '✖'
         deleteButton.className = 'deletebutton-li'
         deleteButton.onclick = () => deleteSong(cursor.key)
 
-        wrap.appendChild(playButton)
+        const playButton = document.createElement('button')
+        playButton.textContent = '▶︎'
+        playButton.className = 'playbutton-li'
+        playButton.onclick = () => playSong(index)
+        playButtons.push(playButton)
+
         wrap.appendChild(deleteButton)
+        wrap.appendChild(playButton)
         li.appendChild(wrap)
 
         playList.appendChild(li)
@@ -138,7 +143,7 @@ function loadPlaylist()
 function playSong(index) 
 {
     const song = songs[index]
-    const blob = new Blob([song.data], { type: song.type })
+    const blob = new Blob([song.data], {type: song.type})
     const url = URL.createObjectURL(blob)
 
     audio.src = url
@@ -146,23 +151,40 @@ function playSong(index)
 
     currentSongIndex = index
     playPauseButton.textContent = '❚❚'
+
+    playButtons.forEach(btn => btn.textContent = '▶︎')
+    if (playButtons[index])
+        playButtons[index].textContent = '❚❚'
+
+    songItems.forEach(item => item.classList.remove('blue-border'))
+    if (songItems[index])
+        songItems[index].classList.add('blue-border')
 }
 
 function deleteSong(id) 
 {
+    event.stopPropagation()
+
     const transaction = db.transaction(['songs'], 'readwrite')
     const store = transaction.objectStore('songs')
 
-    store.delete(id)
+    if (confirm('Delete This Song?!'))
+    {
+        store.delete(id)
+    }
+
     transaction.oncomplete = () => loadPlaylist()
 }
 
 playPauseButton.addEventListener('click', () => 
 {
-    if (audio.paused) {
+    if (audio.paused) 
+    {
         audio.play()
         playPauseButton.textContent = '❚❚'
-    } else {
+    } 
+    else 
+    {
         audio.pause()
         playPauseButton.textContent = '▶︎'
     }
@@ -177,13 +199,10 @@ audio.addEventListener('ended', () =>
 
 audio.addEventListener('timeupdate', () => 
 {
-    if (!isNaN(audio.duration)) {
+    if (!isNaN(audio.duration)) 
+    {
         seekBar.max = audio.duration
         seekBar.value = audio.currentTime
-
-        timeDisplay.textContent =
-            formatTime(audio.currentTime) + ' / ' +
-            formatTime(audio.duration)
     }
 })
 
@@ -192,14 +211,20 @@ seekBar.addEventListener('input', () =>
     audio.currentTime = seekBar.value
 })
 
+const savedVolume = localStorage.getItem('volumeLevel')
+if (savedVolume !== null) 
+{
+    volumeBar.value = savedVolume
+}
+else
+{
+    volumeBar.value = 0.7
+}
+
 volumeBar.addEventListener('input', () => 
 {
-    audio.volume = volumeBar.value
-})
+    const currentValue = volumeBar.value;
+    localStorage.setItem('volumeLevel', currentValue);
 
-function formatTime(seconds)
-{
-    const minutes = Math.floor(seconds / 60)
-    const secondes = Math.floor(seconds % 60)
-    return `${String(minutes).padStart(2, '0')}:${String(secondes).padStart(2, '0')}`
-}
+    audio.volume = currentValue;
+})
