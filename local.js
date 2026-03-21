@@ -90,7 +90,7 @@ function saveSong(file)
         transaction.oncomplete = () => loadPlaylist()
     }
 
-    reader.arrayBuffer(file)
+    reader.readAsArrayBuffer(file)
 }
 
 function loadPlaylist() 
