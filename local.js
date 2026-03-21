@@ -3,9 +3,7 @@ const darkmodeThemeIcon = '🌙'
 const lightmodeThemeIcon = '☀️'
 
 if (!localStorage.getItem('themeMode')) 
-{
     localStorage.setItem('themeMode', 'darkmode')
-}
 
 let themeMode = localStorage.getItem('themeMode') === 'lightmode'
 themeIcon.textContent = themeMode ? darkmodeThemeIcon : lightmodeThemeIcon
@@ -21,13 +19,15 @@ themeIcon.addEventListener('click', () =>
 
 function applyTheme() 
 {
-    const vars = [
+    const vars = 
+    [
         'backgroundcolor-1', 'backgroundcolor-2', 'backgroundcolor-3', 'backgroundcolor-4',
         'backgroundcolor-a', 'backgroundcolor-b',
         'textcolor-1', 'textcolor-2', 'textcolor-3', 'textcolor-4'
     ]
 
-    vars.forEach(i => {
+    vars.forEach(i => 
+    {
         document.body.style.setProperty(`--${i}`, `var(--${localStorage.getItem('themeMode')}-${i})`)
     })
 }
@@ -56,10 +56,8 @@ request.onerror = (event) =>
 request.onupgradeneeded = (event) => 
 {
     db = event.target.result
-
-    if (!db.objectStoreNames.contains('songs')) {
+    if (!db.objectStoreNames.contains('songs'))
         db.createObjectStore('songs', {keyPath: 'id', autoIncrement: true})
-    }
 }
 
 request.onsuccess = (event) => 
@@ -83,7 +81,7 @@ function saveSong(file)
         const transaction = db.transaction(['songs'], 'readwrite')
         const store = transaction.objectStore('songs')
 
-        store.add({
+        store.add ({
             name: file.name,
             data: e.target.result,
             type: file.type
@@ -92,7 +90,7 @@ function saveSong(file)
         transaction.oncomplete = () => loadPlaylist()
     }
 
-    reader.readAsArrayBuffer(file)
+    reader.arrayBuffer(file)
 }
 
 function loadPlaylist() 
@@ -140,6 +138,7 @@ function loadPlaylist()
             playList.appendChild(li)
             cursor.continue()
         }
+
         else
         {
             const lastIndex = localStorage.getItem('lastSongIndex')
@@ -153,7 +152,7 @@ function loadPlaylist()
 
                 audio.src = url
 
-                songItems[currentSongIndex]?.classList.add('active')
+                songItems[currentSongIndex]?.classList.add('blue-border')
             }
         }
     }
@@ -180,12 +179,25 @@ function playSong(index)
     songItems.forEach(item => item.classList.remove('blue-border'))
     if (songItems[index])
         songItems[index].classList.add('blue-border')
+
+    const savedVolume = localStorage.getItem('volume_song_' + song.id)
+    if (savedVolume)
+    {
+        audio.volume = savedVolume
+        volumeBar.value = savedVolume
+    }
+
+    else
+    {
+        const globalVolume = localStorage.getItem('volume_global') || 0.7
+        audio.volume = globalVolume
+        volumeBar.value = globalVolume
+    }
 }
 
 function deleteSong(id) 
 {
-    e.stopPropagation()
-    deleteSong(cursor.key)
+    event.stopPropagation()
 
     const transaction = db.transaction(['songs'], 'readwrite')
     const store = transaction.objectStore('songs')
@@ -208,24 +220,34 @@ playPauseButton.addEventListener('click', () =>
     {
         audio.play()
         playPauseButton.textContent = '❚❚'
+        
+        playButtons.forEach(btn => btn.textContent = '▶︎')
+        if (playButtons[currentSongIndex])
+            playButtons[currentSongIndex].textContent = '❚❚'
     } 
+
     else 
     {
         audio.pause()
         playPauseButton.textContent = '▶︎'
+        
+        playButtons.forEach(btn => btn.textContent = '❚❚')
+        if (playButtons[currentSongIndex])
+            playButtons[currentSongIndex].textContent = '▶︎'
     }
 })
 
 audio.addEventListener('ended', () => 
 {
     if (songs.length === 0) return
+
     currentSongIndex = (currentSongIndex + 1) % songs.length
     playSong(currentSongIndex)
 })
 
 audio.addEventListener('timeupdate', () => 
 {
-    if (!isNaN(audio.duration)) 
+    if (!Number.isNaN(audio.duration)) 
     {
         seekBar.max = audio.duration
         seekBar.value = audio.currentTime
@@ -238,10 +260,11 @@ seekBar.addEventListener('input', () =>
 })
 
 const savedVolume = localStorage.getItem('volumeLevel')
-if (savedVolume !== null) 
+if (savedVolume) 
 {
     volumeBar.value = savedVolume
 }
+
 else
 {
     volumeBar.value = 0.7
@@ -250,7 +273,13 @@ else
 volumeBar.addEventListener('input', () => 
 {
     const currentValue = volumeBar.value;
-    localStorage.setItem('volumeLevel', currentValue);
 
+    if (currentSongIndex !== -1)
+    {
+        const song = songs[currentSongIndex]
+        localStorage.setItem('volume_song_' + song.id, currentValue)
+    }
+
+    localStorage.setItem('volumeLevel', currentValue);
     audio.volume = currentValue;
 })
