@@ -22,8 +22,8 @@ function applyTheme()
     const vars = 
     [
         'backgroundcolor-1', 'backgroundcolor-2', 'backgroundcolor-3', 'backgroundcolor-4',
-        'backgroundcolor-a', 'backgroundcolor-b',
-        'textcolor-1', 'textcolor-2', 'textcolor-3', 'textcolor-4'
+        'backgroundcolor-a', 'backgroundcolor-b', 'backgroundcolor-c',
+        'textcolor-1', 'textcolor-2', 'textcolor-3', 'textcolor-4', 'textcolor-a'
     ]
 
     vars.forEach(i => 
@@ -133,7 +133,7 @@ function loadPlaylist()
 
             const li = document.createElement('li')
             li.addEventListener('click', () => playSong(index))
-            li.textContent = song.name
+            li.textContent = song.name.replace(/\.(mp3|mp4)$/i, '')
             songItems.push(li)
 
             const wrap = document.createElement('div')
@@ -194,7 +194,8 @@ function playSong(index)
     currentSongIndex = index
     playPauseButton.textContent = '❚❚'
 
-    document.title = song.name
+    document.title = song.name.replace(/\.(mp3|mp4)$/i, '')
+    document.getElementById('trackName').textContent = song.name.replace(/\.(mp3|mp4)$/i, '')
 
     localStorage.setItem('lastSongIndex', index)
 
@@ -276,8 +277,8 @@ volumeBar.value = audio.volume * 10
 
 volumeBar.addEventListener('input', () => 
 {
-    const raw = Number(volumeBar.value)
-    const value = Math.max(0, Math.min(1, raw / 10))
+    const rawVolume = Number(volumeBar.value)
+    const value = Math.max(0, Math.min(1, rawVolume / 10))
 
     if (currentSongIndex !== -1)
     {

@@ -96,16 +96,26 @@
         gap: 1em;
 
         width: 100%;
-        max-width: 50em;
+        max-width: 35em;
         height: fit-content;
 
         border-radius: var(--borderradius-square);
         background-color: var(--backgroundcolor-2);
 
         display: flex;
+        flex-direction: column;
         flex-wrap: wrap;
-        align-items: center;
+        justify-content: center;
     }
+
+        .track-name
+        {
+            font-size: 1em;
+            display: flex;
+            flex-wrap: wrap;
+            word-break: break-all;
+            color: var(--textcolor-3);
+        }
 
         .playpause-button
         {
@@ -115,9 +125,9 @@
             outline: none;
 
             width: 5em;
-            height: fit-content;
+            height: 2.5em;
 
-            color: var(--textcolor-1);
+            color: var(--textcolor-3);
 
             border-radius: var(--borderradius-square);
             background-color: var(--backgroundcolor-3);
@@ -145,7 +155,7 @@
             gap: 0.6em;
 
             width: 100%;
-            max-width: 50em;
+            max-width: 35em;
             
             color: var(--textcolor-4);
             border-radius: var(--borderradius-square);
@@ -184,7 +194,7 @@
                     width: 5em;
                     height: 2.5em;
 
-                    color: var(--textcolor-2);
+                    color: var(--textcolor-a);
 
                     border-radius: var(--borderradius-square);
                     background-color: var(--backgroundcolor-3);
