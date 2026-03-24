@@ -1,0 +1,241 @@
+.navbar
+{
+    top: 0;
+    left: 0;
+    padding: 0.6em;
+    gap: 0.6em;
+    width: 100%;
+    height: 4.3em;
+    background-color: var(--backgroundcolor-1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    z-index: 1;
+}
+
+    .navbar-left
+    {
+        width: fit-content;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .searchmusic-bar
+        {
+            padding: 0.6em;
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            border-radius: var(--borderradius-square);
+            background-color: var(--backgroundcolor-2);
+            font-size: 1.2em;
+            color: var(--textcolor-4);
+        }
+
+    .navbar-right
+    {
+        gap: 0.6em;
+        width: fit-content;
+        height: 100%;
+        display: flex;
+    }
+
+        .theme-button
+        {
+            padding: 0.8em;
+            height: 100%;
+            aspect-ratio: 1/1;
+            border-radius: var(--borderradius-circle);
+            border: none;
+            outline: none;
+            background-color: var(--backgroundcolor-1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            &:hover{background-color: var(--backgroundcolor-2);}
+        }
+
+            .darkmode-icon
+            {
+                height: 100%; 
+                aspect-ratio: 1/1;
+                background-color: var(--textcolor-4); 
+                -webkit-mask: url(../image/darkicon.png) no-repeat center / contain; 
+                mask: url(../image/darkicon.png) no-repeat center / contain;
+            }
+
+            .lightmode-icon
+            {
+                height: 100%; 
+                aspect-ratio: 1/1;
+                background-color: var(--textcolor-4); 
+                -webkit-mask: url(../image/lighticon.png) no-repeat center / contain; 
+                mask: url(../image/lighticon.png) no-repeat center / contain;
+            }
+
+        .uploadtrack-button
+        {
+            padding: 1em;
+            height: 100%;
+            aspect-ratio: 1/1;
+            border-radius: var(--borderradius-circle);
+            border: none;
+            outline: none;
+            background-color: var(--backgroundcolor-1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover{background-color: var(--backgroundcolor-2);}
+        }
+
+            .darkmode-trackupload-icon
+            {
+                height: 100%; 
+                aspect-ratio: 1/1;
+                background-color: var(--textcolor-4); 
+                -webkit-mask: url(../image/uploadtrackicon.png) no-repeat center / contain; 
+                mask: url(../image/uploadtrackicon.png) no-repeat center / contain;
+            }
+
+            .lightmode-trackupload-icon
+            {
+                height: 100%; 
+                aspect-ratio: 1/1;
+                background-color: var(--textcolor-4); 
+                -webkit-mask: url(../image/uploadtrackicon.png) no-repeat center / contain; 
+                mask: url(../image/uploadtrackicon.png) no-repeat center / contain;
+            }
+
+.sidebar
+{
+    padding: 0 0.6em 0.6em 0.6em;
+    gap: 0.6em;
+    width: 100%;
+    height: calc(100% - 4.3em);
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+    .user-controls
+    {
+        padding: 0.6em;
+        gap: 1em;
+        width: 100%;
+        max-width: 35em;
+        height: fit-content;
+        border-radius: var(--borderradius-square);
+        background-color: var(--backgroundcolor-2);
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+        .track-name
+        {
+            font-size: 1em;
+            display: flex;
+            white-space: nowrap;
+            overflow: hidden;
+            color: var(--textcolor-3);
+        }
+
+        .controlbutton-wrapper
+        {
+            gap: 0.6em;
+            width: 100%;
+            height: fit-content;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .control-button
+            {
+                padding: 0.6em; 
+                border: none;
+                outline: none;
+                height: 2.5em;
+                aspect-ratio: 1/1;
+                max-width: 2.5em;
+                color: var(--textcolor-3);
+                border-radius: var(--borderradius-square);
+                background-color: var(--backgroundcolor-3);
+                cursor: pointer;
+                &:hover{background-color: var(--backgroundcolor-4);}
+            }
+
+            .playpause-button
+            {
+                padding: 0.6em; 
+                border: none;
+                outline: none;
+                width: 5em;
+                height: 2.5em;
+                color: var(--textcolor-3);
+                border-radius: var(--borderradius-square);
+                background-color: var(--backgroundcolor-3);
+                cursor: pointer;
+                &:hover{background-color: var(--backgroundcolor-4);}
+            }
+
+    .user-playlist
+    {
+        gap: 0.6em;
+        width: 100%;
+        height: fit-content;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
+
+        li
+        {
+            padding: 0.6em;
+            gap: 0.6em;
+            width: 100%;
+            max-width: 35em;
+            color: var(--textcolor-4);
+            border-radius: var(--borderradius-square);
+            background-color: var(--backgroundcolor-2);
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            word-break: break-all;
+            justify-content: space-between;
+            cursor: pointer;
+            position: relative;
+            &:hover{background-color: var(--backgroundcolor-c);}
+        }
+
+            .wrap-wrapper
+            {
+                gap: 0.6em;
+                width: 100%;
+                height: fit-content;
+                display: flex;
+                align-items: center;
+                flex-direction: row-reverse;
+            }
+
+                .deletebutton-li
+                {
+                    padding: 0.6em; 
+                    border: none;
+                    outline: none;
+                    width: 5em;
+                    height: 2.5em;
+                    color: var(--textcolor-a);
+                    border-radius: var(--borderradius-square);
+                    background-color: var(--backgroundcolor-a);
+                    cursor: pointer;
+                    &:hover{background-color: var(--backgroundcolor-b);}
+                }
