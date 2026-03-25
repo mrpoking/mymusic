@@ -74,8 +74,8 @@ audio {display: none;}
 
 dialog::backdrop {background-color: var(--backgroundcolor-1);}
 
-#file-input {display: none;}
-.file-input {width: 100%; height: 100%; cursor: pointer;}
+#track-input {display: none;}
+.track-input {width: 100%; height: 100%; cursor: pointer;}
 
 .blue-border 
 {
@@ -125,27 +125,6 @@ body
     padding-top: 4.3em;
     font-family: 'Courier-New', monospace;
     background-color: var(--backgroundcolor-1);
-}
-
-.track-name-container 
-{
-    width: 100%;
-    overflow: hidden;
-    white-space: nowrap;
-    position: relative;
-}
-
-.track-name 
-{
-    display: inline-block;
-    white-space: nowrap;
-    color: var(--textcolor-3);
-    will-change: transform;
-}
-
-.track-name-container:hover .track-name.scroll-track 
-{
-    animation-play-state: paused;
 }
 
 .scroll-track {

@@ -23,7 +23,7 @@
         justify-content: center;
     }
 
-        .searchmusic-bar
+        .track-search-bar
         {
             padding: 0.6em;
             width: 100%;
@@ -33,6 +33,7 @@
             border-radius: var(--borderradius-square);
             background-color: var(--backgroundcolor-1);
             font-size: 1.2em;
+            font-family: sans-serif;
             color: var(--textcolor-4);
         }
 
@@ -78,7 +79,7 @@
                 mask: url(../image/lighticon.png) no-repeat center / contain;
             }
 
-        .uploadtrack-button
+        .upload-track-button
         {
             padding: 1em;
             height: 100%;
@@ -94,7 +95,7 @@
             &:hover{background-color: var(--backgroundcolor-3);}
         }
 
-            .darkmode-trackupload-icon
+            .darkmode-track-upload-icon
             {
                 height: 100%; 
                 aspect-ratio: 1/1;
@@ -103,7 +104,7 @@
                 mask: url(../image/uploadtrackicon.png) no-repeat center / contain;
             }
 
-            .lightmode-trackupload-icon
+            .lightmode-track-upload-icon
             {
                 height: 100%; 
                 aspect-ratio: 1/1;
@@ -123,7 +124,7 @@
     flex-direction: column;
 }
 
-    .user-controls
+    .user-controls-layout
     {
         padding: 0.6em;
         gap: 1em;
@@ -143,16 +144,29 @@
         box-shadow: 0 0.25em 0.6em rgba(0,0,0,0.25);
     }
 
-        .track-name
+        .track-name-wrapper
         {
-            font-size: 1em;
-            display: flex;
-            white-space: nowrap;
+            width: 100%;
             overflow: hidden;
-            color: var(--textcolor-3);
+            white-space: nowrap;
+            position: relative;
         }
 
-        .controlbutton-wrap
+        .track-name-wrapper:hover .track-name-display.scroll-track 
+        {
+            animation-play-state: paused;
+        }
+
+            .track-name-display
+            {
+                font-size: 1em;
+                display: inline-block;
+                white-space: nowrap;
+                will-change: transform;
+                color: var(--textcolor-3);
+            }
+
+        .control-button-wrapper
         {
             gap: 0.6em;
             width: 100%;
@@ -162,7 +176,7 @@
             justify-content: center;
         }
 
-            .control-button
+            .control-previous-button, .control-next-button
             {
                 padding: 0.6em; 
                 border: none;
@@ -177,7 +191,7 @@
                 &:hover{background-color: var(--backgroundcolor-4);}
             }
 
-            .playpause-button
+            .play-pause-button
             {
                 padding: 0.6em; 
                 border: none;
@@ -191,7 +205,7 @@
                 &:hover{background-color: var(--backgroundcolor-4);}
             }
 
-    .user-playlist
+    .user-playlist-layout
     {
         gap: 0.6em;
         width: 100%;
@@ -200,6 +214,15 @@
         align-items: center;
         flex-direction: column;
     }
+
+        .no-result-layout
+        {
+            background-color: var(--backgroundcolor-1);
+            color: var(--textcolor-4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
         li
         {
@@ -220,7 +243,7 @@
             &:hover{background-color: var(--backgroundcolor-c);}
         }
 
-            .wrap-wrapper
+            .delete-button-wrapper
             {
                 gap: 0.6em;
                 width: 100%;
@@ -230,7 +253,7 @@
                 flex-direction: row-reverse;
             }
 
-                .deletebutton-li
+                .delete-button
                 {
                     padding: 0.6em; 
                     border: none;

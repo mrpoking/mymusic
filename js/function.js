@@ -1,14 +1,20 @@
-const fileInput = document.getElementById('file-input')
+const trackSearch = document.getElementById('trackSearch')
+
+const fileInput = document.getElementById('track-input')
 const audio = document.getElementById('audio')
+
 const previousButton = document.getElementById('previousButton')
 const playPauseButton = document.getElementById('playPauseButton')
 const nextButton = document.getElementById('nextButton')
-const seekBar = document.getElementById('seekBar')
+
 const volumeBar = document.getElementById('volumeBar')
+const seekBar = document.getElementById('seekBar')
+
 const playList = document.getElementById('playList')
 
 let songs = []
 let songItems = []
+
 let currentSongIndex = -1
 let currentAudioURL = null
 let nextAudioURL = null
@@ -18,9 +24,12 @@ let loadToken = 0
 let preloadToken = 0
 let userInteracted = false
 
-const request = indexedDB.open('MusicDB', 1)
+let searchTimeout = null
+let playlistLoaded = false
 
-request.onerror = e => console.log('IndexedDB Error:', e.target.error)
+const request = indexedDB.open('MusicDB', 1)
+request.onerror = e => 
+    console.log('IndexedDB Error:', e.target.error)
 
 request.onupgradeneeded = e => 
 {
@@ -35,15 +44,145 @@ request.onsuccess = e =>
     loadPlaylist()
 }
 
+const noResultsItem = document.createElement('li')
+noResultsItem.classList.add('no-result-layout')
+noResultsItem.textContent = 'No Result...'
+noResultsItem.style.display = 'none'
+
+trackSearch.addEventListener('input', () => 
+{
+    if (!playlistLoaded) return;
+
+    clearTimeout(searchTimeout)
+
+    const searchValue = trackSearch.value.toLowerCase()
+
+    searchTimeout = setTimeout(() =>
+    {
+        if (!playlistLoaded)
+        {
+            noResultsItem.style.display = searchValue.length > 0 ? '' : 'none'
+            return
+        }
+
+        if (searchValue.length === 0)
+        {
+            songItems.forEach(item => item.style.display = '')
+            noResultsItem.style.display = 'none'
+            return
+        }
+
+        if (searchValue.length < 2)
+        {
+            songItems.forEach(item => item.style.display = '')
+            noResultsItem.style.display = 'none'
+            return
+        }
+
+        let trackFound = false
+
+        songItems.forEach((item, index) => 
+        {
+            const trackName = songs[index].name.toLowerCase()
+            const trackMatch = trackName.includes(searchValue)
+
+            item.style.display = trackMatch ? '' : 'none'
+
+            if (trackMatch) 
+                trackFound = true
+        })
+
+        noResultsItem.style.display = trackFound ? 'none' : ''
+    }, 200)
+})
+
+const validFileTypes = new Set(['audio/mpeg', 'audio/mp4'])
 fileInput.addEventListener('change', async e => 
 {
     const files = Array.from(e.target.files)
 
     for (let file of files) 
+    {
+        if (!validFileTypes.has(file.type))
+        {
+            alert(`Invalid File Type: ${file.type} (${file.name})`)
+            console.log('Unsupported File Type:', file.name, file.type)
+            continue
+        }
+
         await saveSong(file)
+    }
 
     loadPlaylist()
 })
+
+function loadPlaylist() 
+{
+    playlistLoaded = false
+    userInteracted = false
+    trackSearch.value = ''
+
+    loadToken++
+    preloadToken++
+
+    songs = []
+    songItems = []
+
+    playList.innerHTML = ''
+    playList.appendChild(noResultsItem)
+
+    const tx = db.transaction('songs', 'readonly')
+    const store = tx.objectStore('songs')
+
+    store.openCursor().onsuccess = e => 
+    {
+        const cursor = e.target.result
+
+        if (cursor)
+        {
+            const song = cursor.value
+            
+            songs.push ({
+                id: song.id, 
+                name: song.name.replace(/\.(mp3|mp4)$/i, ''),
+                type: song.type,
+            })
+
+            const li = document.createElement('li')
+
+            li.textContent = song.name.replace(/\.(mp3|mp4)$/i, '')
+            li.onclick = () => playSongById(song.id)
+
+            const wrap = document.createElement('div')
+            wrap.className = 'delete-button-wrapper'
+
+            const deleteButton = document.createElement('button')
+            deleteButton.textContent = '✖'
+            deleteButton.className = 'delete-button'
+            deleteButton.onclick = ev => deleteSong(ev, song.id)
+
+            wrap.appendChild(deleteButton)
+            li.appendChild(wrap)
+
+            playList.appendChild(li)
+            songItems.push(li)
+
+            cursor.continue()
+        }
+
+        else 
+        {
+            restoreLastSong()
+            playlistLoaded = true
+
+            if (trackSearch.value.length > 0) 
+            {
+                const event = new Event('input')
+                trackSearch.dispatchEvent(event)
+            }
+        }
+    }
+}
 
 function saveSong(file) 
 {
@@ -68,64 +207,6 @@ function saveSong(file)
             tx.oncomplete = resolve
         }
     })
-}
-
-function loadPlaylist() 
-{
-    userInteracted = false
-
-    loadToken++
-    preloadToken++
-
-    songs = []
-    songItems = []
-
-    playList.innerHTML = ''
-
-    const tx = db.transaction('songs', 'readonly')
-    const store = tx.objectStore('songs')
-
-    store.openCursor().onsuccess = e => 
-    {
-        const cursor = e.target.result
-
-        if (cursor)
-        {
-            const song = cursor.value
-            
-            songs.push ({
-                id: song.id, 
-                name: song.name,
-                type: song.type,
-            })
-
-            const li = document.createElement('li')
-
-            li.textContent = song.name.replace(/\.(mp3|mp4)$/i, '')
-            li.onclick = () => playSongById(song.id)
-
-            const wrap = document.createElement('div')
-            wrap.className = 'wrap-wrapper'
-
-            const deleteButton = document.createElement('button')
-            deleteButton.textContent = '✖'
-            deleteButton.className = 'deletebutton-li'
-            deleteButton.onclick = ev => deleteSong(ev, song.id)
-
-            wrap.appendChild(deleteButton)
-            li.appendChild(wrap)
-
-            playList.appendChild(li)
-            songItems.push(li)
-
-            cursor.continue()
-        }
-
-        else 
-        {
-            restoreLastSong()
-        }
-    }
 }
 
 function playSongById(id)
@@ -493,7 +574,6 @@ audio.addEventListener('error', () =>
     const err = audio.error
 
     if (!err) return
-
     if (err.code === 1) return
 
     console.log('Audio Error:', err)

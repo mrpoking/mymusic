@@ -7,10 +7,10 @@ const themeIcon = document.getElementById('themeButton')
 const uploadFileButton = document.getElementById('trackUploadButton')
 
 const darkmodeThemeIcon = `<div class="darkmode-icon"></div>`
-const darkmodeFileUploadIcon = `<div class="darkmode-trackupload-icon">`
+const darkmodeFileUploadIcon = `<div class="darkmode-track-upload-icon">`
 
 const lightmodeThemeIcon = `<div class="lightmode-icon"></div>`
-const lightmodeFileUploadIcon = `<div class="lightmode-trackupload-icon">`
+const lightmodeFileUploadIcon = `<div class="lightmode-track-upload-icon">`
 
 function updateThemeUI()
 {
