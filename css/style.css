@@ -91,7 +91,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-
             &:hover{background-color: var(--backgroundcolor-2);}
         }
 
@@ -129,14 +128,19 @@
         padding: 0.6em;
         gap: 1em;
         width: 100%;
-        max-width: 35em;
+        max-width: 15em;
         height: fit-content;
         border-radius: var(--borderradius-square);
-        background-color: var(--backgroundcolor-2);
+        background-color: color-mix(in oklch, var(--backgroundcolor-2) 45%, transparent);
         display: flex;
         flex-direction: column;
         flex-wrap: wrap;
         justify-content: center;
+        position: sticky;
+        top: 4.3em;
+        left: 0;
+        z-index: 1;
+        box-shadow: 0 0.25em 0.6em rgba(0,0,0,0.25);
     }
 
         .track-name
@@ -148,7 +152,7 @@
             color: var(--textcolor-3);
         }
 
-        .controlbutton-wrapper
+        .controlbutton-wrap
         {
             gap: 0.6em;
             width: 100%;
@@ -164,8 +168,8 @@
                 border: none;
                 outline: none;
                 height: 2.5em;
-                aspect-ratio: 1/1;
-                max-width: 2.5em;
+                width: 100%;
+                max-width: 5em;
                 color: var(--textcolor-3);
                 border-radius: var(--borderradius-square);
                 background-color: var(--backgroundcolor-3);
