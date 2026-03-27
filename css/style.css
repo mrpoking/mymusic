@@ -23,7 +23,7 @@
         justify-content: center;
     }
 
-        .track-search-bar
+        .search-track-bar
         {
             padding: 0.6em;
             width: 100%;
@@ -61,7 +61,7 @@
             &:hover{background-color: var(--backgroundcolor-2);}
         }
 
-            .darkmode-icon
+            .darkmode-theme-icon
             {
                 height: 100%; 
                 aspect-ratio: 1/1;
@@ -70,7 +70,7 @@
                 mask: url(../image/darkicon.png) no-repeat center / contain;
             }
 
-            .lightmode-icon
+            .lightmode-theme-icon
             {
                 height: 100%; 
                 aspect-ratio: 1/1;
@@ -95,7 +95,7 @@
             &:hover{background-color: var(--backgroundcolor-3);}
         }
 
-            .darkmode-track-upload-icon
+            .darkmode-upload-track-icon
             {
                 height: 100%; 
                 aspect-ratio: 1/1;
@@ -104,7 +104,7 @@
                 mask: url(../image/uploadtrackicon.png) no-repeat center / contain;
             }
 
-            .lightmode-track-upload-icon
+            .lightmode-upload-track-icon
             {
                 height: 100%; 
                 aspect-ratio: 1/1;
@@ -142,29 +142,60 @@
         left: 0;
         z-index: 1;
         box-shadow: 0 0.25em 0.6em rgba(0,0,0,0.25);
+        -webkit-backdrop-filter: blur(0.1em);
+        backdrop-filter: blur(0.1em);
+        overflow: hidden;
     }
 
         .track-name-wrapper
         {
-            width: 100%;
-            overflow: hidden;
+            width: fit-content;
+            display: inline-block;
             white-space: nowrap;
-            position: relative;
+            color: var(--textcolor-3);
+            animation: scroll-left 50s linear infinite;
+            padding-right: 3em;
         }
 
-        .track-name-wrapper:hover .track-name-display.scroll-track 
+        .track-name-wrapper::after
+        {
+            content: " ";
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 3em;
+            animation: scroll-left 3s linear infinite;
+            animation-delay: -3s;
+        }
+
+        .track-name-wrapper:hover
         {
             animation-play-state: paused;
         }
 
-            .track-name-display
+        .track-name-wrapper:hover::after
+        {
+            animation-play-state: paused;
+        }
+
+        @keyframes scroll-left
+        {
+            0%
             {
-                font-size: 1em;
-                display: inline-block;
-                white-space: nowrap;
-                will-change: transform;
-                color: var(--textcolor-3);
+                transform: translateX(0);
             }
+            50%
+            {
+                transform: translateX(-100%);
+            }
+            50.01%
+            {
+                transform: translateX(100%);
+            }
+            100%
+            {
+                transform: translateX(0);
+            }
+        }
 
         .control-button-wrapper
         {
@@ -215,7 +246,7 @@
         flex-direction: column;
     }
 
-        .no-result-layout
+        .no-results-layout
         {
             background-color: var(--backgroundcolor-1);
             color: var(--textcolor-4);

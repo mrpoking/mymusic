@@ -1,112 +1,78 @@
-const trackSearch = document.getElementById('trackSearch')
+const requestDB = indexedDB.open('playlistDB', 2)
+requestDB.onerror = event => 
+    console.log('IndexedDB Error:', event.target.error)
 
-const fileInput = document.getElementById('track-input')
-const audio = document.getElementById('audio')
-
-const previousButton = document.getElementById('previousButton')
-const playPauseButton = document.getElementById('playPauseButton')
-const nextButton = document.getElementById('nextButton')
-
-const volumeBar = document.getElementById('volumeBar')
-const seekBar = document.getElementById('seekBar')
-
-const playList = document.getElementById('playList')
-
-let songs = []
-let songItems = []
-
-let currentSongIndex = -1
-let currentAudioURL = null
-let nextAudioURL = null
-
-let db
-let loadToken = 0
-let preloadToken = 0
-let userInteracted = false
-
-let searchTimeout = null
-let playlistLoaded = false
-
-const request = indexedDB.open('MusicDB', 1)
-request.onerror = e => 
-    console.log('IndexedDB Error:', e.target.error)
-
-request.onupgradeneeded = e => 
+requestDB.onupgradeneeded = event => 
 {
-    db = e.target.result
-    if (!db.objectStoreNames.contains('songs'))
-        db.createObjectStore('songs', {keyPath: 'id', autoIncrement: true})
+    playlistDB = event.target.result
+    if (!playlistDB.objectStoreNames.contains('tracks'))
+        playlistDB.createObjectStore('tracks', { keyPath: 'id', autoIncrement: true })
 }
 
-request.onsuccess = e => 
+requestDB.onsuccess = event => 
 {
-    db = e.target.result
+    playlistDB = event.target.result
+    if (!playlistDB.objectStoreNames.contains('tracks'))
+    {
+        console.error('Tracks Object Store Not Found!')
+        return
+    }
+
     loadPlaylist()
 }
 
-const noResultsItem = document.createElement('li')
-noResultsItem.classList.add('no-result-layout')
-noResultsItem.textContent = 'No Result...'
-noResultsItem.style.display = 'none'
+const noResultsLayout = document.createElement('li')
+noResultsLayout.classList.add('no-results-layout')
+noResultsLayout.textContent = 'No Results...'
+noResultsLayout.style.display = 'none'
 
-trackSearch.addEventListener('input', () => 
+searchTrackBar.addEventListener('input', () => 
 {
-    if (!playlistLoaded) return;
+    if (!isPlaylistLoaded) return;
 
-    clearTimeout(searchTimeout)
-
-    const searchValue = trackSearch.value.toLowerCase()
-
-    searchTimeout = setTimeout(() =>
+    clearTimeout(searchTrackTimeout)
+    
+    const searchValue = searchTrackBar.value.toLowerCase()
+    searchTrackTimeout = setTimeout(() =>
     {
-        if (!playlistLoaded)
+        if (!isPlaylistLoaded)
         {
-            noResultsItem.style.display = searchValue.length > 0 ? '' : 'none'
-            return
-        }
-
-        if (searchValue.length === 0)
-        {
-            songItems.forEach(item => item.style.display = '')
-            noResultsItem.style.display = 'none'
+            noResultsLayout.style.display = 
+            (searchValue.length > 0) ? '' : 'none'
             return
         }
 
         if (searchValue.length < 2)
         {
-            songItems.forEach(item => item.style.display = '')
-            noResultsItem.style.display = 'none'
+            trackMetadata.forEach(item => item.style.display = '')
+            noResultsLayout.style.display = 'none'
             return
         }
 
-        let trackFound = false
-
-        songItems.forEach((item, index) => 
+        trackMetadata.forEach((item, index) => 
         {
-            const trackName = songs[index].name.toLowerCase()
+            const trackName = tracks[index].name.toLowerCase()
             const trackMatch = trackName.includes(searchValue)
 
             item.style.display = trackMatch ? '' : 'none'
-
             if (trackMatch) 
-                trackFound = true
+                isTrackFound = true
         })
 
-        noResultsItem.style.display = trackFound ? 'none' : ''
+        noResultsLayout.style.display = isTrackFound ? 'none' : ''
     }, 200)
 })
 
 const validFileTypes = new Set(['audio/mpeg', 'audio/mp4'])
-fileInput.addEventListener('change', async e => 
+uploadTrack.addEventListener('change', async event => 
 {
-    const files = Array.from(e.target.files)
-
+    const files = Array.from(event.target.files)
     for (let file of files) 
     {
         if (!validFileTypes.has(file.type))
         {
-            alert(`Invalid File Type: ${file.type} (${file.name})`)
-            console.log('Unsupported File Type:', file.name, file.type)
+            console.log(`Unsupported File Type: ${file.type} (${file.name})`)
+            alert(`Invalid File Type: ${file.type}, (${file.name})`)
             continue
         }
 
@@ -118,40 +84,37 @@ fileInput.addEventListener('change', async e =>
 
 function loadPlaylist() 
 {
-    playlistLoaded = false
-    userInteracted = false
-    trackSearch.value = ''
+    isPlaylistLoaded = false
+    userInteractedEarly = false
+    searchTrackBar.value = ''
 
     loadToken++
     preloadToken++
 
-    songs = []
-    songItems = []
+    tracks = []
+    trackMetadata = []
 
-    playList.innerHTML = ''
-    playList.appendChild(noResultsItem)
+    userPlaylist.innerHTML = ''
+    userPlaylist.appendChild(noResultsLayout)
 
-    const tx = db.transaction('songs', 'readonly')
-    const store = tx.objectStore('songs')
+    const tx = playlistDB.transaction('tracks', 'readonly')
+    const store = tx.objectStore('tracks')
 
-    store.openCursor().onsuccess = e => 
+    store.openCursor().onsuccess = event => 
     {
-        const cursor = e.target.result
-
+        const cursor = event.target.result
         if (cursor)
         {
-            const song = cursor.value
-            
-            songs.push ({
-                id: song.id, 
-                name: song.name.replace(/\.(mp3|mp4)$/i, ''),
-                type: song.type,
+            const track = cursor.value
+            tracks.push ({
+                id: track.id, 
+                name: track.name.replace(/\.(mp3|mp4)$/i, ''),
+                type: track.type,
             })
 
             const li = document.createElement('li')
-
-            li.textContent = song.name.replace(/\.(mp3|mp4)$/i, '')
-            li.onclick = () => playSongById(song.id)
+            li.textContent = track.name.replace(/\.(mp3|mp4)$/i, '')
+            li.onclick = () => playSongById(track.id)
 
             const wrap = document.createElement('div')
             wrap.className = 'delete-button-wrapper'
@@ -159,13 +122,13 @@ function loadPlaylist()
             const deleteButton = document.createElement('button')
             deleteButton.textContent = '✖'
             deleteButton.className = 'delete-button'
-            deleteButton.onclick = ev => deleteSong(ev, song.id)
+            deleteButton.onclick = event => deleteSong(event, track.id)
 
             wrap.appendChild(deleteButton)
             li.appendChild(wrap)
 
-            playList.appendChild(li)
-            songItems.push(li)
+            userPlaylist.appendChild(li)
+            trackMetadata.push(li)
 
             cursor.continue()
         }
@@ -173,12 +136,12 @@ function loadPlaylist()
         else 
         {
             restoreLastSong()
-            playlistLoaded = true
+            isPlaylistLoaded = true
 
-            if (trackSearch.value.length > 0) 
+            if (searchTrackBar.value.length > 0) 
             {
                 const event = new Event('input')
-                trackSearch.dispatchEvent(event)
+                searchTrackBar.dispatchEvent(event)
             }
         }
     }
@@ -188,12 +151,11 @@ function saveSong(file)
 {
     return new Promise(resolve => 
     {
-        const tx = db.transaction('songs', 'readwrite')
-        const store = tx.objectStore('songs')
-        
+        const tx = playlistDB.transaction('tracks', 'readwrite')
+        const store = tx.objectStore('tracks')
         const checkRequest = store.getAll()
 
-        checkRequest.onsuccess = async () =>
+        checkRequest.onsuccess = () =>
         {
             if (checkRequest.result.some(s => s.name === file.name))
                 return resolve()
@@ -209,113 +171,107 @@ function saveSong(file)
     })
 }
 
-function playSongById(id)
-{
-    userInteracted = true
-
-    const index = songs.findIndex(s => s.id === id)
-
-    if (index !== -1)
-        playSong(index)
-}
-
-function restoreLastSong()
-{
-    if (userInteracted) return
-
-    const savedIndex = Number(localStorage.getItem('lastSongIndex'))
-
-    if (!Number.isNaN(savedIndex) && savedIndex >= 0 && savedIndex < songs.length)
-        playSong(savedIndex)
-}
-
 function getSongData(id)
 {
     return new Promise(resolve => 
     {
-        const tx = db.transaction('songs', 'readonly')
-        const store = tx.objectStore('songs')
+        const tx = playlistDB.transaction('tracks', 'readonly')
+        const store = tx.objectStore('tracks')
         const requests = store.get(id)
 
-        requests.onsuccess = e => resolve(e.target.result)
+        requests.onsuccess = event => resolve(event.target.result)
         requests.onerror = () => resolve(null)
     })
+}
+
+function playSongById(id)
+{
+    userInteractedEarly = true
+
+    const index = tracks.findIndex(t => t.id === id)
+    if (index !== -1)
+    {
+        playSong(index)
+        console.log('Playing:', tracks[index].name)
+    }
+}
+
+function restoreLastSong()
+{
+    if (userInteractedEarly) 
+        return
+
+    const savedIndex = Number(localStorage.getItem('lastSongIndex'))
+    if (!Number.isNaN(savedIndex) && savedIndex >= 0 && savedIndex < tracks.length)
+        playSong(savedIndex)
 }
 
 async function playSong(index) 
 {
     const token = ++loadToken
+    const meta = tracks[index]
 
-    const meta = songs[index]
-    if (!meta) return
+    if (!meta) 
+        return
 
-    audio.pause()
-    audio.removeAttribute('src')
-    audio.load()
+    audioFromTrack.pause()
+    audioFromTrack.removeAttribute('src')
+    audioFromTrack.load()
 
-    const song = await getSongData(meta.id)
+    if (token !== loadToken) 
+        return
 
-    if (token !== loadToken) return
-
-    if (!song?.data)
+    const track = await getSongData(meta.id)
+    if (!track?.data)
     {
         console.log('Invalid Audio Data')
         return
     }
 
-    if (currentAudioURL)
-    {
-        const oldURL = currentAudioURL
+    if (currentTrackURL)
+        URL.revokeObjectURL(currentTrackURL)
 
-        setTimeout(() => URL.revokeObjectURL(oldURL), 1000)
-    }
+    const blob = track.data instanceof Blob
+        ? track.data
+        : new Blob([track.data], { type: meta.type })
 
-    const savedSeek = Number(localStorage.getItem('seek_song_' + meta.id))
-
+    const savedSeek = 
+    Number(localStorage.getItem('seek_track_' + meta.id))
     if (!Number.isNaN(savedSeek))
-        audio.currentTime = savedSeek
+        audioFromTrack.currentTime = savedSeek
 
-    const blob = song.data instanceof Blob
-        ? song.data
-        : new Blob([song.data], { type: meta.type })
+    currentTrackURL = URL.createObjectURL(blob)
 
-    currentAudioURL = URL.createObjectURL(blob)
+    audioFromTrack.src = currentTrackURL
+    audioFromTrack.play().catch(() => {})
 
-    audio.src = currentAudioURL
-    audio.play().catch(() => {})
+    currentTrackIndex = index
+    playPauseTrackButton.textContent = '❚❚'
 
-    currentSongIndex = index
-    playPauseButton.textContent = '❚❚'
-
-    const savedVolumeStr = localStorage.getItem('volume_song_' + meta.id);
-
+    const savedVolumeStr = localStorage.getItem('volume_track_' + meta.id);
     if (savedVolumeStr === null) 
     {
         const globalVolume = Number(localStorage.getItem('volumeLevel')) || 0.5;
-        
-        audio.volume = globalVolume;
+        audioFromTrack.volume = globalVolume;
         volumeBar.value = globalVolume * 10;
     } 
     
     else 
     {
         const savedSongVolume = Number(savedVolumeStr);
-
-        audio.volume = savedSongVolume;
+        audioFromTrack.volume = savedSongVolume;
         volumeBar.value = savedSongVolume * 10;
     }
 
     const name = meta.name.replace(/\.(mp3|mp4)$/i, '')
-
     document.title = name
-    document.getElementById('trackName').textContent = name
+    document.getElementById('trackNameWrapper').textContent = name
 
     localStorage.setItem('lastSongIndex', index)
 
-    songItems.forEach(item => item.classList.remove('blue-border'))
-
-    if(songItems[index]) 
-        songItems[index].classList.add('blue-border')
+    trackMetadata.forEach(item => item.classList.remove('blue-border'))
+    if(trackMetadata[index]) 
+        trackMetadata[index].classList.add('blue-border')
 
     preloadNext()
     updateUI()
@@ -325,156 +281,146 @@ function preloadNext()
 {
     const token = ++preloadToken
 
-    if (songs.length < 2) return
+    if (tracks.length < 2) return
 
-    const nextIndex = (currentSongIndex + 1) % songs.length
-    const nextMeta = songs[nextIndex]
+    const nextIndex = (currentTrackIndex + 1) % tracks.length
+    const nextMeta = tracks[nextIndex]
 
-    getSongData(nextMeta.id).then(song => 
+    getSongData(nextMeta.id).then(track => 
     {
-        if (token !== preloadToken) 
+        if (token !== preloadToken || !track?.data) 
             return
 
-        if (!song?.data) 
-            return
-
-        if (nextAudioURL)
-            URL.revokeObjectURL(nextAudioURL)
+        if (nextTrackURL)
+            URL.revokeObjectURL(nextTrackURL)
 
         try
         {
-            const blob = song?.data instanceof Blob
-                ? song.data
-                : new Blob([song.data], { type: nextMeta.type })
+            const blob = track?.data instanceof Blob
+                ? track.data
+                : new Blob([track.data], { type: nextMeta.type })
 
-            nextAudioURL = URL.createObjectURL(blob)
+            nextTrackURL = URL.createObjectURL(blob)
         }
         
         catch (error)
         {
             console.error('Preload Error:', error)
-            nextAudioURL = null
+            nextTrackURL = null
         }
     })
 }
 
-function deleteSong(e, id) 
+function deleteSong(event, id) 
 {
-    e.stopPropagation()
+    event.stopPropagation()
 
-    const indexToDelete = songs.findIndex(s => s.id === id)
+    const indexToDelete = tracks.findIndex(t => t.id === id)
+    if (indexToDelete === -1) 
+        return
 
-    if (indexToDelete === -1) return
+    const isCurrent = indexToDelete === currentTrackIndex
+    if (!confirm('Delete This Song?')) 
+        return
 
-    const isCurrent = indexToDelete === currentSongIndex
-
-    if (!confirm('Delete This Song?')) return
-
-    const tx = db.transaction('songs', 'readwrite')
-    tx.objectStore('songs').delete(id)
+    const tx = playlistDB.transaction('tracks', 'readwrite')
+    tx.objectStore('tracks').delete(id)
 
     tx.oncomplete = () =>
     {
-        if (currentAudioURL)
+        if (currentTrackURL)
         {
-            URL.revokeObjectURL(currentAudioURL)
-            currentAudioURL = null
+            URL.revokeObjectURL(currentTrackURL)
+            currentTrackURL = null
         }
 
-        if (nextAudioURL)
+        if (nextTrackURL)
         {
-            URL.revokeObjectURL(nextAudioURL)
-            nextAudioURL = null
+            URL.revokeObjectURL(nextTrackURL)
+            nextTrackURL = null
         }
 
-        if (isCurrent)
+        if (isCurrent && tracks.length > 1)
         {
-            if (songs.length > 1)
-            {
-                const nextIndex = indexToDelete >= songs.length - 1
-                    ? 0
-                    : indexToDelete
+            const nextIndex = indexToDelete >= tracks.length - 1
+                ? 0
+                : indexToDelete
 
-                loadPlaylist()
-                setTimeout(() => playSong(nextIndex), 50)
-            }
-
-            else
-            {
-                audio.pause()
-                audio.src = ''
-                currentSongIndex = -1
-                loadPlaylist()
-            }
+            loadPlaylist()
+            setTimeout(() => playSong(nextIndex), 50)
         }
 
         else
         {
+            audioFromTrack.pause()
+            audio.src = ''
+            currentTrackIndex = -1
             loadPlaylist()
         }
     }
 }
 
-previousButton.addEventListener('click', () => 
+playPreviousTrackButton.addEventListener('click', () => 
 {
-    if (songs.length === 0) return
+    if (tracks.length === 0) return
 
-    let previousIndex = currentSongIndex -1
-
+    let previousIndex = currentTrackIndex -1
     if (previousIndex < 0) 
-        previousIndex = songs.length - 1
+        previousIndex = tracks.length - 1
 
     playSong(previousIndex)
+    console.log('Playing Previous Track:', tracks[previousIndex].name)
 })
 
-playPauseButton.addEventListener('click', () => 
+playPauseTrackButton.addEventListener('click', () => 
 {
-    if (audio.paused) 
+    if (audioFromTrack.paused) 
     {
-        audio.play().catch(() => {})
-        playPauseButton.textContent = '❚❚'
+        audioFromTrack.play().catch(() => {})
+        playPauseTrackButton.textContent = '❚❚'
+        console.log('Playing Track:', tracks[currentTrackIndex]?.name || 'Unknown')
     } 
 
     else 
     {
-        audio.pause()
-        playPauseButton.textContent = '▶︎'
+        audioFromTrack.pause()
+        playPauseTrackButton.textContent = '▶︎'
+        console.log('Pausing Track:', tracks[currentTrackIndex]?.name || 'Unknown')
     }
 })
 
-nextButton.addEventListener('click', () =>
+playNextTrackButton.addEventListener('click', () =>
 {
-    if (songs.length === 0) return
+    if (tracks.length === 0) return
 
-    const nextIndex = (currentSongIndex + 1) % songs.length
-    
+    const nextIndex = (currentTrackIndex + 1) % tracks.length
     playSong(nextIndex)
+    console.log('Playing Next Track:', tracks[nextIndex].name)
 })
 
-audio.addEventListener('ended', () => 
+audioFromTrack.addEventListener('ended', () => 
 {
-    localStorage.setItem('seek_song_' + songs[currentSongIndex].id, 0)
+    localStorage.setItem('seek_track_' + tracks[currentTrackIndex].id, 0)
 
-    if (!songs.length) 
+    if (!tracks.length) 
         return
 
-    const nextIndex = (currentSongIndex + 1) % songs.length
-
-    if (nextAudioURL)
+    const nextIndex = (currentTrackIndex + 1) % tracks.length
+    if (nextTrackURL)
     {
-        if (!nextAudioURL.startsWith('blob:')) 
+        if (!nextTrackURL.startsWith('blob:')) 
             return
 
-        currentSongIndex = nextIndex
+        currentTrackIndex = nextIndex
 
-        if (currentAudioURL)
-            URL.revokeObjectURL(currentAudioURL)
+        if (currentTrackURL)
+            URL.revokeObjectURL(currentTrackURL)
 
-        currentAudioURL = nextAudioURL
-        nextAudioURL = null
+        currentTrackURL = nextTrackURL
+        nextTrackURL = null
 
-        audio.src = currentAudioURL
-        audio.play().catch(() => {})
+        audioFromTrack.src = currentTrackURL
+        audioFromTrack.play().catch(() => {})
 
         updateUI()
         preloadNext()
@@ -486,81 +432,39 @@ audio.addEventListener('ended', () =>
     }
 })
 
-function updateUI()
+audioFromTrack.addEventListener('timeupdate', () => 
 {
-    const meta = songs[currentSongIndex]
-    const name = meta.name.replace(/\.(mp3|mp4)$/i, '')
-
-    document.title = name
-    document.getElementById('trackName').textContent = name
-
-    songItems.forEach(item => item.classList.remove('blue-border'))
-
-    if (songItems[currentSongIndex])
-        songItems[currentSongIndex].classList.add('blue-border')
-
-    if ('mediaSession' in navigator) 
+    if (!Number.isNaN(audioFromTrack.duration)) 
     {
-        navigator.mediaSession.setActionHandler('previoustrack', () => 
+        seekBar.max = audioFromTrack.duration
+        seekBar.value = audioFromTrack.currentTime
+
+        if (currentTrackIndex !== -1 && tracks[currentTrackIndex])
         {
-            previousButton.click();
-        })
-
-        navigator.mediaSession.setActionHandler('nexttrack', () => 
-        {
-            nextButton.click();
-        })
-
-        navigator.mediaSession.setActionHandler('play', () => 
-        {
-            audio.play();
-            playPauseButton.textContent = '❚❚';
-        })
-
-        navigator.mediaSession.setActionHandler('pause', () => 
-        {
-            audio.pause();
-            playPauseButton.textContent = '▶︎';
-        })
-    }
-}
-
-audio.addEventListener('timeupdate', () => 
-{
-    if (!Number.isNaN(audio.duration)) 
-    {
-        seekBar.max = audio.duration
-        seekBar.value = audio.currentTime
-
-        if (currentSongIndex !== -1 && songs[currentSongIndex])
-        {
-            const song = songs[currentSongIndex]
-
-            localStorage.setItem('seek_song_' + song.id, audio.currentTime)
+            const track = tracks[currentTrackIndex]
+            localStorage.setItem('seek_track_' + track.id, audioFromTrack.currentTime)
         }
     }
 })
 
 seekBar.addEventListener('input', () => 
 {
-    audio.currentTime = seekBar.value
+    audioFromTrack.currentTime = seekBar.value
 })
 
 const savedVolume = Number(localStorage.getItem('volumeLevel')) || 0.5
-
-audio.volume = savedVolume
+audioFromTrack.volume = savedVolume
 volumeBar.value = savedVolume * 10
 
 volumeBar.addEventListener('input', () => 
 {
     const value = Math.max(0, Math.min(1, Number(volumeBar.value) / 10))
+    audioFromTrack.volume = value;
 
-    audio.volume = value;
-
-    if (currentSongIndex !== -1 && songs[currentSongIndex])
+    if (currentTrackIndex !== -1 && tracks[currentTrackIndex])
     {
-        const song = songs[currentSongIndex]
-        localStorage.setItem('volume_song_' + song.id, value)
+        const track = tracks[currentTrackIndex]
+        localStorage.setItem('volume_track_' + track.id, value)
     }
 
     else
@@ -569,12 +473,54 @@ volumeBar.addEventListener('input', () =>
     }
 })
 
-audio.addEventListener('error', () => 
+audioFromTrack.addEventListener('error', () => 
 {
-    const err = audio.error
+    const err = audioFromTrack.error
 
     if (!err) return
     if (err.code === 1) return
 
     console.log('Audio Error:', err)
 })
+
+function updateUI()
+{
+    const meta = tracks[currentTrackIndex]
+    const name = meta.name.replace(/\.(mp3|mp4)$/i, '')
+
+    document.title = name
+    document.getElementById('trackNameWrapper').textContent = name
+
+    trackMetadata.forEach(item => item.classList.remove('blue-border'))
+    if (trackMetadata[currentTrackIndex])
+        trackMetadata[currentTrackIndex].classList.add('blue-border')
+
+    if ('mediaSession' in navigator) 
+    {
+        navigator.mediaSession.setActionHandler('previoustrack', () => 
+        {
+            playPreviousTrackButton.click();
+            console.log('Playing Previous Track:', tracks[(currentTrackIndex - 1 + tracks.length) % tracks.length].name)
+        })
+
+        navigator.mediaSession.setActionHandler('play', () => 
+        {
+            audioFromTrack.play();
+            playPauseTrackButton.textContent = '❚❚';
+            console.log('Playing Track:', tracks[currentTrackIndex]?.name || 'Unknown')
+        })
+
+        navigator.mediaSession.setActionHandler('pause', () => 
+        {
+            audioFromTrack.pause();
+            playPauseTrackButton.textContent = '▶︎';
+            console.log('Pausing Track:', tracks[currentTrackIndex]?.name || 'Unknown')
+        })
+
+        navigator.mediaSession.setActionHandler('nexttrack', () => 
+        {
+            playNextTrackButton.click();
+            console.log('Playing Next Track:', tracks[(currentTrackIndex + 1) % tracks.length].name)
+        })
+    }
+}

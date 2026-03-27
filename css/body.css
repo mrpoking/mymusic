@@ -74,8 +74,8 @@ audio {display: none;}
 
 dialog::backdrop {background-color: var(--backgroundcolor-1);}
 
-#track-input {display: none;}
-.track-input {width: 100%; height: 100%; cursor: pointer;}
+#upload-track {display: none;}
+.upload-track {width: 100%; height: 100%; cursor: pointer;}
 
 .blue-border 
 {

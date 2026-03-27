@@ -1,47 +1,55 @@
-if (!localStorage.getItem('themeMode')) 
-    localStorage.setItem('themeMode', 'darkmode')
+if (!localStorage.getItem('isLightMode')) 
+    localStorage.setItem('isLightMode', 'darkmode')
 
-let themeMode = localStorage.getItem('themeMode') === 'lightmode'
+let isLightMode = (localStorage.getItem('isLightMode') === 'lightmode')
 
-const themeIcon = document.getElementById('themeButton')
-const uploadFileButton = document.getElementById('trackUploadButton')
+const themeButton = document.getElementById('themeButton')
+const uploadTrackButtonElement = document.getElementById('uploadTrackButton')
 
-const darkmodeThemeIcon = `<div class="darkmode-icon"></div>`
-const darkmodeFileUploadIcon = `<div class="darkmode-track-upload-icon">`
+const lightmodeThemeIcon = `<div class="lightmode-theme-icon"></div>`
+const lightmodeUploadTrackIcon = `<div class="lightmode-upload-track-icon"></div>`
 
-const lightmodeThemeIcon = `<div class="lightmode-icon"></div>`
-const lightmodeFileUploadIcon = `<div class="lightmode-track-upload-icon">`
+const darkmodeThemeIcon = `<div class="darkmode-theme-icon"></div>`
+const darkmodeUploadTrackIcon = `<div class="darkmode-upload-track-icon"></div>`
 
 function updateThemeUI()
 {
-    themeIcon.innerHTML = themeMode ? darkmodeThemeIcon : lightmodeThemeIcon
-    uploadFileButton.innerHTML = themeMode ? darkmodeFileUploadIcon : lightmodeFileUploadIcon
+    themeButton.innerHTML = isLightMode 
+        ? darkmodeThemeIcon 
+        : lightmodeThemeIcon
+
+    uploadTrackButtonElement.innerHTML = isLightMode 
+        ? darkmodeUploadTrackIcon 
+        : lightmodeUploadTrackIcon
 }
 
 updateThemeUI()
-applyTheme()
+applyThemeColors()
 
-themeIcon.addEventListener('click', () => 
+themeButton.addEventListener('click', () => 
 {
-    themeMode = !themeMode
-    localStorage.setItem('themeMode', themeMode ? 'lightmode' : 'darkmode')
+    isLightMode = !isLightMode
+    localStorage.setItem('isLightMode', isLightMode ? 'lightmode' : 'darkmode')
+
     updateThemeUI()
-    applyTheme()
+    applyThemeColors()
+
+    console.log('Theme Mode Changed To:', isLightMode ? 'Light Mode' : 'Dark Mode')
 })
 
-function applyTheme() 
+function applyThemeColors() 
 {
-    const vars = 
+    const colorVariables = 
     [
-        'backgroundcolor-1', 'backgroundcolor-2', 'backgroundcolor-3', 'backgroundcolor-4', 'cardbackgroundcolor-1', 'cardbackgroundcolor-2', 'cardbackgroundcolor-3',
+        'backgroundcolor-1', 'backgroundcolor-2', 'backgroundcolor-3', 'backgroundcolor-4', 
         'backgroundcolor-a', 'backgroundcolor-b', 'backgroundcolor-c',
+        'cardbackgroundcolor-1', 'cardbackgroundcolor-2', 'cardbackgroundcolor-3',
         'textcolor-1', 'textcolor-2', 'textcolor-3', 'textcolor-4', 'textcolor-a'
     ]
 
-    const getThemeMode = localStorage.getItem('themeMode')
-
-    vars.forEach(i => 
+    const getSavedThemeMode = localStorage.getItem('isLightMode')
+    colorVariables.forEach(i => 
     {
-        document.body.style.setProperty(`--${i}`, `var(--${getThemeMode}-${i})`)
+        document.body.style.setProperty(`--${i}`, `var(--${getSavedThemeMode}-${i})`)
     })
 }
