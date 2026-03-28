@@ -1,29 +1,47 @@
-const searchTrackBar = document.getElementById('searchTrackBar')
+import { dom, store } from './state.js'
 
-const uploadTrack = document.getElementById('upload-track')
-const audioFromTrack = document.getElementById('audioFromTrack')
+const 
+{
+    searchTrackBar,
+    uploadTrack,
+    audioFromTrack,
+    playPreviousTrackButton,
+    playPauseTrackButton,
+    playNextTrackButton,
+    volumeBar,
+    seekBar,
+    userPlaylist,
+} = dom
 
-const playPreviousTrackButton = document.getElementById('playPreviousTrackButton')
-const playPauseTrackButton = document.getElementById('playPauseTrackButton')
-const playNextTrackButton = document.getElementById('playNextTrackButton')
+store.tracks = []
+store.trackMetadata = []
 
-const volumeBar = document.getElementById('volumeBar')
-const seekBar = document.getElementById('seekBar')
+store.currentTrackIndex = -1
+store.currentTrackURL = null
+store.nextTrackURL = null
 
-const userPlaylist = document.getElementById('userPlaylist')
+store.playlistDB = null
+store.loadToken = 0
+store.preloadToken = 0
 
-let tracks = []
-let trackMetadata = []
+store.isTrackFound = false
+store.searchTrackTimeout = null
+store.isPlaylistLoaded = false
 
-let currentTrackIndex = -1
-let currentTrackURL = null
-let nextTrackURL = null
+store.userInteractedEarly = false
 
-let playlistDB
-let loadToken = 0
-let preloadToken = 0
+Object.assign(dom, 
+{
+    searchTrackBar,
+    uploadTrack,
+    audioFromTrack,
 
-let isTrackFound = false
-let searchTrackTimeout = null
-let isPlaylistLoaded = false
-let userInteractedEarly = false
+    playPreviousTrackButton,
+    playPauseTrackButton,
+    playNextTrackButton,
+
+    volumeBar,
+    seekBar,
+
+    userPlaylist,
+})

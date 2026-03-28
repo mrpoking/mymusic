@@ -5,7 +5,7 @@
     padding: 0.6em;
     gap: 0.6em;
     width: 100%;
-    height: 4.3em;
+    height: 4em;
     background-color: var(--backgroundcolor-1);
     display: flex;
     justify-content: space-between;
@@ -61,15 +61,6 @@
             &:hover{background-color: var(--backgroundcolor-2);}
         }
 
-            .darkmode-theme-icon
-            {
-                height: 100%; 
-                aspect-ratio: 1/1;
-                background-color: var(--textcolor-4); 
-                -webkit-mask: url(../image/darkicon.png) no-repeat center / contain; 
-                mask: url(../image/darkicon.png) no-repeat center / contain;
-            }
-
             .lightmode-theme-icon
             {
                 height: 100%; 
@@ -77,6 +68,15 @@
                 background-color: var(--textcolor-4); 
                 -webkit-mask: url(../image/lighticon.png) no-repeat center / contain; 
                 mask: url(../image/lighticon.png) no-repeat center / contain;
+            }
+
+            .darkmode-theme-icon
+            {
+                height: 100%; 
+                aspect-ratio: 1/1;
+                background-color: var(--textcolor-4); 
+                -webkit-mask: url(../image/darkicon.png) no-repeat center / contain; 
+                mask: url(../image/darkicon.png) no-repeat center / contain;
             }
 
         .upload-track-button
@@ -95,7 +95,7 @@
             &:hover{background-color: var(--backgroundcolor-3);}
         }
 
-            .darkmode-upload-track-icon
+            .lightmode-upload-track-icon
             {
                 height: 100%; 
                 aspect-ratio: 1/1;
@@ -104,7 +104,7 @@
                 mask: url(../image/uploadtrackicon.png) no-repeat center / contain;
             }
 
-            .lightmode-upload-track-icon
+            .darkmode-upload-track-icon
             {
                 height: 100%; 
                 aspect-ratio: 1/1;
@@ -118,7 +118,8 @@
     padding: 0 0.6em 0.6em 0.6em;
     gap: 0.6em;
     width: 100%;
-    height: calc(100% - 4.3em);
+    height: calc(100% - 4em);
+    color: var(--textcolor-4);
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -127,7 +128,7 @@
     .user-controls-layout
     {
         padding: 0.6em;
-        gap: 1em;
+        gap: 1.6em;
         width: 100%;
         max-width: 15em;
         height: fit-content;
@@ -137,65 +138,100 @@
         flex-direction: column;
         flex-wrap: wrap;
         justify-content: center;
-        position: sticky;
-        top: 4.3em;
+        position: fixed;
+        top: 4em;
         left: 0;
         z-index: 1;
         box-shadow: 0 0.25em 0.6em rgba(0,0,0,0.25);
         -webkit-backdrop-filter: blur(0.1em);
         backdrop-filter: blur(0.1em);
+        touch-action: none;
         overflow: hidden;
     }
 
-        .track-name-wrapper
+    .user-controls-layout:active
+    {
+        cursor: grabbing;
+    }
+
+        .drag-handle 
         {
-            width: fit-content;
-            display: inline-block;
-            white-space: nowrap;
-            color: var(--textcolor-3);
-            animation: scroll-left 50s linear infinite;
-            padding-right: 3em;
+            position: absolute;
+            top: 0.6em;
+            right: 0.6em;
+            width: 1.6em;
+            height: 1.6em;
+            background-color: var(--cardbackgroundcolor-3);
+            border: 4px solid var(--textcolor-3);
+            border-radius: 0.3em;
+            cursor: grab;
+            opacity: 1;
+            z-index: 1;
         }
 
-        .track-name-wrapper::after
+        .drag-handle:active 
         {
-            content: " ";
-            display: inline-block;
-            white-space: nowrap;
-            padding-left: 3em;
-            animation: scroll-left 3s linear infinite;
-            animation-delay: -3s;
+            cursor: grabbing;
+            opacity: 1;
         }
 
-        .track-name-wrapper:hover
+        .track-name-container
         {
-            animation-play-state: paused;
+            width: 100%;
+            height: fit-content;
+            display: flex;
+            overflow: hidden;
         }
 
-        .track-name-wrapper:hover::after
-        {
-            animation-play-state: paused;
-        }
+            .track-name-wrapper
+            {
+                width: fit-content;
+                display: inline-block;
+                white-space: nowrap;
+                color: var(--textcolor-3);
+                animation: scroll-left 50s linear infinite;
+            }
 
-        @keyframes scroll-left
-        {
-            0%
+            .track-name-wrapper::after
             {
-                transform: translateX(0);
+                content: " ";
+                display: inline-block;
+                white-space: nowrap;
+                padding-left: 3em;
+                animation: scroll-left 3s linear infinite;
+                animation-delay: -3s;
+                overflow: hidden;
             }
-            50%
+
+            .track-name-wrapper:hover
             {
-                transform: translateX(-100%);
+                animation-play-state: paused;
             }
-            50.01%
+
+            .track-name-wrapper:hover::after
             {
-                transform: translateX(100%);
+                animation-play-state: paused;
             }
-            100%
+
+            @keyframes scroll-left
             {
-                transform: translateX(0);
+                0%
+                {
+                    transform: translateX(0);
+                }
+                50%
+                {
+                    transform: translateX(-100%);
+                }
+                50.01%
+                {
+                    transform: translateX(100%);
+                }
+                100%
+                {
+                    transform: translateX(0);
+                }
             }
-        }
 
         .control-button-wrapper
         {
@@ -248,7 +284,6 @@
 
         .no-results-layout
         {
-            background-color: var(--backgroundcolor-1);
             color: var(--textcolor-4);
             display: flex;
             justify-content: center;
@@ -263,7 +298,7 @@
             max-width: 35em;
             color: var(--textcolor-4);
             border-radius: var(--borderradius-square);
-            background-color: var(--backgroundcolor-2);
+            background-color: color-mix(in oklch, var(--backgroundcolor-2) 60%, transparent);
             display: flex;
             flex-direction: column;
             flex-wrap: wrap;
@@ -271,7 +306,14 @@
             justify-content: space-between;
             cursor: pointer;
             position: relative;
-            &:hover{background-color: var(--backgroundcolor-c);}
+            -webkit-backdrop-filter: blur(0.1em);
+            backdrop-filter: blur(0.1em);
+            &:hover 
+            {
+                background-color: color-mix(in oklch, var(--backgroundcolor-3) 60%, transparent); 
+                -webkit-backdrop-filter: blur(0.01em);
+                backdrop-filter: blur(0.01em);
+            }
         }
 
             .delete-button-wrapper

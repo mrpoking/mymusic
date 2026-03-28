@@ -52,4 +52,6 @@ function applyThemeColors()
     {
         document.body.style.setProperty(`--${i}`, `var(--${getSavedThemeMode}-${i})`)
     })
+
+    document.body.style.backgroundImage = `var(--${getSavedThemeMode}-background-image)`
 }

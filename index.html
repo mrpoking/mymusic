@@ -10,11 +10,9 @@
     <link rel="stylesheet" href="css/body.css">
     <link rel="stylesheet" href="css/style.css">
     
-    <script src="js/theme.js" defer></script>
-    <script src="js/initialize.js" defer></script>
-    <script src="js/function.js" defer></script>
+    <script type="module" src="js/main.js" defer></script>
 </head>
-<body>
+<body id="body">
     <nav class="navbar">
         <div class="navbar-left">
             <button type="button" id="themeButton" class="theme-button"></button>
@@ -37,8 +35,12 @@
 
     <div class="sidebar">
         <div class="user-controls-layout">
-            <div class="track-name-wrapper" id="trackNameWrapper">
-                <p>Loading Previous Track..</p>
+            <div class="drag-handle"></div>
+
+            <div class="track-name-container">
+                <div class="track-name-wrapper" id="trackNameWrapper">
+                    <p>Loading Previous Track..</p>
+                </div>
             </div>
 
             <div class="control-button-wrapper">

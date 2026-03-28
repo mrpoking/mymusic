@@ -20,6 +20,7 @@ input::placeholder {color: var(--fontcolor-2);}
     border-radius: var(--borderradius-square);
     outline: none;
 }
+
 #volumeBar::-webkit-slider-thumb, #seekBar::-webkit-slider-thumb
 {
     -webkit-appearance: none;
@@ -31,6 +32,7 @@ input::placeholder {color: var(--fontcolor-2);}
     cursor: pointer;
     border: none;
 }
+
 #volumeBar::-moz-range-thumb, #seekBar::-moz-range-thumb 
 {
     background: var(--backgroundcolor-a);
@@ -38,6 +40,7 @@ input::placeholder {color: var(--fontcolor-2);}
     cursor: pointer;
     border: none;
 }
+
 #volumeBar::-ms-thumb, #seekBar::-ms-thumb 
 {
     background: var(--backgroundcolor-a);
@@ -53,12 +56,14 @@ input[type="range"]
     outline: none;
     cursor: pointer;
 }
+
 input[type="range"]::-webkit-slider-runnable-track 
 {
     height: 0.6em;
     border-radius: 3px;
     background-color: var(--backgroundcolor-3);
 }
+
 input[type="range"]::-webkit-slider-thumb 
 {
     -webkit-appearance: none;
@@ -77,22 +82,27 @@ dialog::backdrop {background-color: var(--backgroundcolor-1);}
 #upload-track {display: none;}
 .upload-track {width: 100%; height: 100%; cursor: pointer;}
 
-.blue-border 
+.active-track
 {
+    position: relative;
     color: var(--textcolor-3);
     background-color: var(--backgroundcolor-2);
-    position: relative;
-
-    &:hover{background-color: var(--backgroundcolor-c); }
+    border-radius: 0.6rem;
+    z-index: 0;
 }
 
-.blue-border::before,
-.blue-border::after 
+.active-track:hover 
+{
+    background-color: var(--backgroundcolor-c);
+}
+
+.active-track::before 
 {
     content: "";
     position: absolute;
-    inset: -0.2rem;
-    z-index: -1;
+    inset: 0;
+    padding: 0.18rem;
+    border-radius: inherit;
     background: conic-gradient(
         from var(--gradient-angle),
         var(--cardbackgroundcolor-1),
@@ -101,11 +111,30 @@ dialog::backdrop {background-color: var(--backgroundcolor-1);}
         var(--cardbackgroundcolor-2),
         var(--cardbackgroundcolor-1)
     );
-    border-radius: inherit;
+
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+
     animation: rotation 18s linear infinite;
+    pointer-events: none;
+    z-index: -1;
 }
 
-.blue-border::after {filter: blur(7em);}
+.active-track::after 
+{
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 0.18rem;
+    border-radius: inherit;
+    background: inherit;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: -2;
+}
 
 @property --gradient-angle 
 {
@@ -116,26 +145,33 @@ dialog::backdrop {background-color: var(--backgroundcolor-1);}
 
 @keyframes rotation 
 {
-    0% {--gradient-angle: 0deg;}
-    100% {--gradient-angle: 360deg;}
+    0%   { --gradient-angle: 0deg; }
+    100% { --gradient-angle: 360deg; }
 }
 
 body
 {
-    padding-top: 4.3em;
+    width: 100%;
+    height: 100%;
+    padding-top: 4em;
     font-family: 'Courier-New', monospace;
-    background-color: var(--backgroundcolor-1);
+    background: var(--lightmode-background-image) no-repeat center / cover;
+    background-attachment: fixed;
 }
 
-.scroll-track {
+.scroll-track 
+{
     animation-name: scrollText;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
     animation-fill-mode: forwards;
 }
 
-@keyframes scrollText {
+@keyframes scrollText 
+{
     0% { transform: translateX(var(--startX)); }
+    50% { transform: translateX(var(--midX)); }
+    50.01% { transform: translateX(var(--resetX)); }
     100% { transform: translateX(var(--endX)); }
 }
 
@@ -143,6 +179,12 @@ body
 {
     --borderradius-square: 0.4em;
     --borderradius-circle: 2em;
+}
+
+:root 
+{
+    --darkmode-background-image: url('../image/darkmodeBG.png');
+    --lightmode-background-image: url('../image/lightmodeBG.png');
 }
 
 :root
@@ -171,8 +213,8 @@ body
     --darkmode-backgroundcolor-3: oklch(35% 0 0);
     --darkmode-backgroundcolor-4: oklch(41% 0 0);
 
-    --darkmode-cardbackgroundcolor-1: oklch(25% 0 0);
-    --darkmode-cardbackgroundcolor-2: oklch(25% 0 0);
+    --darkmode-cardbackgroundcolor-1: oklch(29% 0 0);
+    --darkmode-cardbackgroundcolor-2: oklch(29% 0 0);
     --darkmode-cardbackgroundcolor-3: oklch(56.251% 0.07707 142.809);
 
     --darkmode-backgroundcolor-a: oklch(56.251% 0.07707 142.809); /* oklch(56.251% 0.07707 142.809) */
