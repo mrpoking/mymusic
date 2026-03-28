@@ -183,8 +183,8 @@ body
 
 :root 
 {
-    --darkmode-background-image: url('../image/darkmodeBG.png');
-    --lightmode-background-image: url('../image/lightmodeBG.png');
+    --darkmode-background-image: url('image/darkmodeBG.png');
+    --lightmode-background-image: url('image/lightmodeBG.png');
 }
 
 :root
