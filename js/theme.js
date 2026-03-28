@@ -23,8 +23,11 @@ function updateThemeUI()
         : lightmodeUploadTrackIcon
 }
 
-updateThemeUI()
-applyThemeColors()
+window.addEventListener("load", () => 
+{
+    updateThemeUI();
+    applyThemeColors();
+});
 
 themeButton.addEventListener('click', () => 
 {
