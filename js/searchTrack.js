@@ -1,11 +1,12 @@
-import { dom, store } from './state.js'
+import { dom, store } from './stateExport.js'
 import { noResultsLayout } from './function.js'
 
 const { searchTrackBar } = dom
 
 searchTrackBar.addEventListener('input', () =>
 {
-    if (!store.isPlaylistLoaded) return;
+    if (!store.isPlaylistLoaded) 
+        return;
 
     clearTimeout(store.searchTrackTimeout)
     

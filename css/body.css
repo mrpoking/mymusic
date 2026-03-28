@@ -150,8 +150,8 @@ body
 
 :root 
 {
-    --darkmode-background-image: url('image/darkmodeBody.png');
-    --lightmode-background-image: url('image/lightmodeBody.png');
+    --darkmode-background-image: url('../image/darkmodeBody.png');
+    --lightmode-background-image: url('../image/lightmodeBody.png');
 }
 
 :root

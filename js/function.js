@@ -1,4 +1,4 @@
-﻿import { dom, store } from './state.js'
+﻿import { dom, store } from './stateExport.js'
 
 export const noResultsLayout = document.createElement('li')
 noResultsLayout.classList.add('no-results-layout')
@@ -12,26 +12,26 @@ const
     audioFromTrack,
     playPauseTrackButton,
     volumeBar,
-    seekBar,
 } = dom
 
 export function loadPlaylist() 
 {
-    store.isPlaylistLoaded = false
-    store.userInteractedEarly = false
     searchTrackBar.value = ''
-
-    store.loadToken++
-    store.preloadToken++
 
     store.tracks = []
     store.trackMetadata = []
 
+    store.loadToken++
+    store.preloadToken++
+
+    store.isPlaylistLoaded = false
+    store.userInteractedEarly = false
+
     userPlaylist.innerHTML = ''
     userPlaylist.appendChild(noResultsLayout)
 
-    const tx = store.playlistDB.transaction('tracks', 'readonly')
-    const trackStore = tx.objectStore('tracks')
+    const transaction = store.playlistDB.transaction('tracks', 'readonly')
+    const trackStore = transaction.objectStore('tracks')
 
     trackStore.openCursor().onsuccess = event => 
     {
@@ -62,6 +62,7 @@ export function loadPlaylist()
 
             userPlaylist.appendChild(li)
             store.trackMetadata.push(li)
+
             cursor.continue()  
         } 
         
@@ -83,13 +84,13 @@ export function saveSong(file)
 {
     return new Promise(resolve => 
     {
-        const tx = store.playlistDB.transaction('tracks', 'readwrite')
-        const trackStore = tx.objectStore('tracks')
+        const transaction = store.playlistDB.transaction('tracks', 'readwrite')
+        const trackStore = transaction.objectStore('tracks')
         const checkRequest = trackStore.getAll()
 
         checkRequest.onsuccess = () => 
         {
-            if (checkRequest.result.some(s => s.name === file.name))
+            if (checkRequest.result.some(t => t.name === file.name))
                 return resolve()
 
             trackStore.add ({
@@ -98,7 +99,7 @@ export function saveSong(file)
                 type: file.type,
             })
 
-            tx.oncomplete = resolve
+            transaction.oncomplete = resolve
         }
     })
 }
@@ -107,8 +108,8 @@ export function getSongData(id)
 {
     return new Promise(resolve => 
     {
-        const tx = store.playlistDB.transaction('tracks', 'readonly')
-        const trackStore = tx.objectStore('tracks')
+        const transaction = store.playlistDB.transaction('tracks', 'readonly')
+        const trackStore = transaction.objectStore('tracks')
         const request = trackStore.get(id)
 
         request.onsuccess = event => resolve(event.target.result)
@@ -135,7 +136,10 @@ export function restoreLastSong()
 
     const savedIndex = Number(localStorage.getItem('lastSongIndex'))
     if (!Number.isNaN(savedIndex) && savedIndex >= 0 && savedIndex < store.tracks.length)
+    {
         playSong(savedIndex)
+        console.log('Restoring Last Played Song:', store.tracks[savedIndex].name)
+    }
 }
 
 export async function playSong(index) 
@@ -156,16 +160,18 @@ export async function playSong(index)
     const track = await getSongData(meta.id)
     if (!track?.data) 
     {
-        console.log('Invalid Audio Data')
+        console.log('Invalid Audio Data!')
         return
     }
 
     if (store.currentTrackURL) 
         URL.revokeObjectURL(store.currentTrackURL)
 
-    const blob = track.data instanceof Blob ? track.data : new Blob([track.data], { type: meta.type })
-    const savedSeek = Number(localStorage.getItem('seek_track_' + meta.id))
+    const blob = track.data instanceof Blob 
+        ? track.data 
+        : new Blob([track.data], { type: meta.type })
 
+    const savedSeek = Number(localStorage.getItem('seek_track_' + meta.id))
     if (!Number.isNaN(savedSeek)) 
         audioFromTrack.currentTime = savedSeek
 
@@ -206,10 +212,10 @@ export async function playSong(index)
 
 export function preloadNext() 
 {
-    const token = ++store.preloadToken
     if (store.tracks.length < 2) 
         return
 
+    const token = ++store.preloadToken
     const nextIndex = (store.currentTrackIndex + 1) % store.tracks.length
     const nextMeta = store.tracks[nextIndex]
 
@@ -223,14 +229,17 @@ export function preloadNext()
 
         try 
         {
-            const blob = track.data instanceof Blob ? track.data : new Blob([track.data], { type: nextMeta.type })
+            const blob = track.data instanceof Blob 
+                ? track.data 
+                : new Blob([track.data], { type: nextMeta.type })
+
             store.nextTrackURL = URL.createObjectURL(blob)
         } 
         
         catch (error) 
         {
-            console.error('Preload Error:', error)
             store.nextTrackURL = null
+            console.error('Preload Error:', error)
         }
     })
 }
@@ -247,10 +256,9 @@ export function deleteSong(event, id)
     if (!confirm('Delete This Song?'))
         return
 
-    const tx = store.playlistDB.transaction('tracks', 'readwrite')
-    tx.objectStore('tracks').delete(id)
-
-    tx.oncomplete = () => 
+    const transaction = store.playlistDB.transaction('tracks', 'readwrite')
+    transaction.objectStore('tracks').delete(id)
+    transaction.oncomplete = () => 
     {
         if (store.currentTrackURL) 
         {
@@ -264,8 +272,12 @@ export function deleteSong(event, id)
             store.nextTrackURL = null
         }
 
-        if (isCurrent && store.tracks.length > 1) {
-            const nextIndex = indexToDelete >= store.tracks.length - 1 ? 0 : indexToDelete
+        if (isCurrent && store.tracks.length > 1) 
+        {
+            const nextIndex = indexToDelete >= store.tracks.length - 1 
+                ? 0 
+                : indexToDelete
+
             loadPlaylist()
             setTimeout(() => playSong(nextIndex), 50)
         } 
@@ -274,6 +286,7 @@ export function deleteSong(event, id)
         {
             audioFromTrack.pause()
             audioFromTrack.src = ''
+
             store.currentTrackIndex = -1
             loadPlaylist()
         }
@@ -311,6 +324,100 @@ function clampCardToScreen()
 
 window.addEventListener('resize', clampCardToScreen)
 window.addEventListener('load', clampCardToScreen)
+
+store.volumeBeforeMute = store.volumeBeforeMute ?? audioFromTrack.volume
+document.addEventListener('keydown', event =>
+{
+    if (event.key === 'ArrowUp') 
+    {
+        event.preventDefault()
+
+        let newSeek = audioFromTrack.currentTime + 5
+        if (newSeek > audioFromTrack.duration) 
+            newSeek = audioFromTrack.duration
+
+        audioFromTrack.currentTime = newSeek
+        seekBar.value = newSeek
+
+        console.log('Seek Forward (Keyboard):', Math.round(newSeek) + 's')
+    } 
+    
+    else if (event.key === 'ArrowDown') 
+    {
+        event.preventDefault()
+
+        let newSeek = audioFromTrack.currentTime - 5
+        if (newSeek < 0) 
+            newSeek = 0
+        
+        audioFromTrack.currentTime = newSeek
+        seekBar.value = newSeek
+
+        console.log('Seek Backward (Keyboard):', Math.round(newSeek) + 's')
+    }
+
+    else if (event.key === 'ArrowLeft')
+    {
+        event.preventDefault()
+        dom.playPreviousTrackButton.click()
+
+        console.log('Playing Previous Track:', store.tracks[(store.currentTrackIndex - 1 + store.tracks.length) % store.tracks.length].name)
+    }
+
+    else if (event.key === 'ArrowRight')
+    {
+        event.preventDefault()
+        dom.playNextTrackButton.click()
+
+        console.log('Playing Next Track:', store.tracks[(store.currentTrackIndex + 1) % store.tracks.length].name)
+    }
+
+    else if (event.code === 'Space')
+    {
+        event.preventDefault()
+
+        if (audioFromTrack.paused)
+        {
+            audioFromTrack.play()
+            playPauseTrackButton.textContent = '❚❚'
+
+            console.log('Playing Track:', store.tracks[store.currentTrackIndex]?.name || 'Unknown')
+        }
+
+        else
+        {
+            audioFromTrack.pause()
+            playPauseTrackButton.textContent = '▶︎'
+
+            console.log('Pausing Track:', store.tracks[store.currentTrackIndex]?.name || 'Unknown')
+        }
+    }
+
+    else if (event.key === 'M' || event.key === 'm')
+    {
+        event.preventDefault()
+
+        if (audioFromTrack.volume > 0)
+        {
+            store.volumeBeforeMute = audioFromTrack.volume
+
+            audioFromTrack.volume = 0
+            volumeBar.value = 0
+
+            console.log('Muted')
+        }
+        else
+        {
+            const restored = store.volumeBeforeMute ?? 
+            Number(localStorage.getItem('volume_track_' + store.tracks[store.currentTrackIndex]?.id))
+
+            audioFromTrack.volume = restored
+            volumeBar.value = restored * 10
+
+            console.log('Unmuted, Volume Restored to:', restored)
+        }
+    }
+})
 
 export function updateUI() 
 {

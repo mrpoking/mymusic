@@ -1,4 +1,4 @@
-import { store } from './state.js'
+import { store } from './stateExport.js'
 import { loadPlaylist } from './function.js'
 
 const requestDB = indexedDB.open('playlistDB', 2)
