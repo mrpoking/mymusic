@@ -13,7 +13,7 @@ const
     volumeBar,
     seekBar,
     
-    userPlaylist,
+    userPlaylistLayout,
 } = dom
 
 Object.assign(dom, 
@@ -29,7 +29,7 @@ Object.assign(dom,
     volumeBar,
     seekBar,
 
-    userPlaylist,
+    userPlaylistLayout,
 })
 
 store.tracks = []

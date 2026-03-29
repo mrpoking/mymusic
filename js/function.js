@@ -8,7 +8,7 @@ noResultsLayout.style.display = 'none'
 const 
 {
     searchTrackBar,
-    userPlaylist,
+    userPlaylistLayout,
     audioFromTrack,
     playPauseTrackButton,
     volumeBar,
@@ -27,8 +27,8 @@ export function loadPlaylist()
     store.isPlaylistLoaded = false
     store.userInteractedEarly = false
 
-    userPlaylist.innerHTML = ''
-    userPlaylist.appendChild(noResultsLayout)
+    userPlaylistLayout.innerHTML = ''
+    userPlaylistLayout.appendChild(noResultsLayout)
 
     const transaction = store.playlistDB.transaction('tracks', 'readonly')
     const trackStore = transaction.objectStore('tracks')
@@ -60,7 +60,7 @@ export function loadPlaylist()
             wrap.appendChild(deleteButton)
             li.appendChild(wrap)
 
-            userPlaylist.appendChild(li)
+            userPlaylistLayout.appendChild(li)
             store.trackMetadata.push(li)
 
             cursor.continue()  

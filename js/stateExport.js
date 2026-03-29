@@ -11,7 +11,7 @@ export const dom =
     volumeBar: document.getElementById('volumeBar'),
     seekBar: document.getElementById('seekBar'),
 
-    userPlaylist: document.getElementById('userPlaylist'),
+    userPlaylistLayout: document.getElementById('userPlaylistLayout'),
 }
 
 export const store = 

@@ -1,5 +1,6 @@
 *, *::before, *::after {box-sizing: border-box; margin: 0; padding: 0;}
 html {&:has(dialog[open]:modal) {overflow: hidden;}} 
+
 .image-fullsize {width: 100%; height: 100%;}
 img {-webkit-user-drag: none;}
 img[src=""], img:not([src]), img.missing {display: none;}
@@ -10,12 +11,15 @@ input[type="search"]::-webkit-search-decoration,
 input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-results-button,
 input[type="search"]::-webkit-search-results-decoration {display: none; -webkit-appearance: none; appearance: none;}
+
 input::placeholder {color: var(--fontcolor-2);}
 
 input[type="range"] 
 {
     width: 100%;
+
     background-color: #ffffff;
+
     outline: none;
     cursor: pointer;
 }
@@ -23,19 +27,23 @@ input[type="range"]
 input[type="range"]::-webkit-slider-runnable-track 
 {
     height: 0.6em;
+
     border-radius: 3px;
     background-color: var(--backgroundcolor-3);
 }
 
 input[type="range"]::-webkit-slider-thumb 
 {
-    -webkit-appearance: none;
+    margin-top: -0.34em;
+
     height: 2em;
     aspect-ratio: 1/1;
-    background-color: var(--backgroundcolor-a);
+
     border-radius: var(--borderradius-square);
-    margin-top: -0.34em;
+    background-color: var(--backgroundcolor-a);
     transition: background 0.3s;
+
+    -webkit-appearance: none;
 }
 
 audio {display: none;}
@@ -47,27 +55,26 @@ dialog::backdrop {background-color: var(--backgroundcolor-1);}
 
 .active-track
 {
-    position: relative;
     color: var(--textcolor-3);
-    background-color: color-mix(in oklch, var(--backgroundcolor-2) 60%, transparent);
     border-radius: 0.6rem;
+    background-color: color-mix(in oklch, var(--backgroundcolor-2) 60%, transparent);
+
+    position: relative;
     z-index: 0;
 }
 
 @supports (background-color: color-mix(in oklch, var(--backgroundcolor-c) 60%, transparent)) 
 {
-    .active-track:hover
-    {
-        background-color: color-mix(in oklch, var(--backgroundcolor-c) 60%, transparent);
-    }
+    .active-track:hover {background-color: color-mix(in oklch, var(--backgroundcolor-c) 60%, transparent);}
 }
 
 .active-track::before 
 {
     content: "";
-    position: absolute;
-    inset: 0;
+
     padding: 0.18rem;
+    inset: 0;
+
     border-radius: inherit;
     background: 
         conic-gradient(from var(--gradient-angle),
@@ -77,26 +84,32 @@ dialog::backdrop {background-color: var(--backgroundcolor-1);}
             var(--cardbackgroundcolor-2),
             var(--cardbackgroundcolor-1)
         );
+
     -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
     mask-repeat: no-repeat;
+    mask-composite: exclude;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    animation: rotation 18s linear infinite;
-    pointer-events: none;
+
     z-index: -1;
+    position: absolute;
+    pointer-events: none;
+    animation: rotation 18s linear infinite;
 }
 
 .active-track::after 
 {
     content: "";
-    position: absolute;
-    inset: 0;
+
     padding: 0.18rem;
     border-radius: inherit;
     background: inherit;
+
+    position: absolute;
+    inset: 0;
+
     opacity: 0.4;
     pointer-events: none;
     z-index: -2;
@@ -111,24 +124,25 @@ dialog::backdrop {background-color: var(--backgroundcolor-1);}
 
 @keyframes rotation 
 {
-    0%   { --gradient-angle: 0deg; }
-    100% { --gradient-angle: 360deg; }
+    0% {--gradient-angle: 0deg;}
+    100% {--gradient-angle: 360deg;}
 }
 
 body
 {
     margin: 0;
-    padding: 0;
+    padding-top: 4em;
+
     width: 100%;
     height: 100%;
-    padding-top: 4em;
+    min-height: 100vh;
+
     font-family: 'Courier-New', monospace;
     background-image: var(--lightmode-background-image);
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% auto;
     background-attachment: fixed;
-    min-height: 100vh;
     background-color: var(--backgroundcolor-1);
 }
 
@@ -142,10 +156,10 @@ body
 
 @keyframes scrollText 
 {
-    0% { transform: translateX(var(--startX)); }
-    50% { transform: translateX(var(--midX)); }
-    50.01% { transform: translateX(var(--resetX)); }
-    100% { transform: translateX(var(--endX)); }
+    0% {transform: translateX(var(--startX));}
+    50% {transform: translateX(var(--midX));}
+    50.01% {transform: translateX(var(--resetX));}
+    100% {transform: translateX(var(--endX));}
 }
 
 :root

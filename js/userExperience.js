@@ -5,7 +5,7 @@ const { playPreviousTrackButton, playPauseTrackButton, playNextTrackButton, audi
 
 playPreviousTrackButton.addEventListener('click', () => 
 {
-    if (store.tracks.length === 0) 
+    if (store.tracks.length < 2) 
         return
 
     let previousIndex = store.currentTrackIndex - 1
@@ -18,6 +18,9 @@ playPreviousTrackButton.addEventListener('click', () =>
 
 playPauseTrackButton.addEventListener('click', () => 
 {
+    if (store.currentTrackIndex === -1 || !audioFromTrack.src)
+        return
+
     if (audioFromTrack.paused) 
     {
         audioFromTrack.play().catch(() => {})
@@ -37,7 +40,7 @@ playPauseTrackButton.addEventListener('click', () =>
 
 playNextTrackButton.addEventListener('click', () =>
 {
-    if (store.tracks.length === 0) 
+    if (store.tracks.length < 2) 
         return
 
     const nextIndex = (store.currentTrackIndex + 1) % store.tracks.length
@@ -47,12 +50,12 @@ playNextTrackButton.addEventListener('click', () =>
 })
 
 const controls = document.querySelector('.user-controls-layout')
+const saved = JSON.parse(localStorage.getItem("controlsPos"))
 
 let offsetX = 0
 let offsetY = 0
 let isDragging = false
 
-const saved = JSON.parse(localStorage.getItem("controlsPos"))
 if (saved) 
 {
     controls.style.left = saved.left
